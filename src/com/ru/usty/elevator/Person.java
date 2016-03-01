@@ -18,6 +18,7 @@ public class Person implements Runnable {
         }
         System.out.println("Person thread finished");
         ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
+        System.out.println("Climing up elevator shaft");
         ElevatorScene.scene.personExitsAtFloor(destinationFloor);
     }
 }
