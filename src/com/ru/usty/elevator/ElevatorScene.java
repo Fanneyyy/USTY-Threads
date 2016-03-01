@@ -112,17 +112,14 @@ public class ElevatorScene {
 		 * (you don't have to join() yourself)
 		 */
 
-		//dumb code, replace it!
-
         ElevatorScene.scene.incrementNumberOfPeopleWaitingAtFloor(sourceFloor);
         return thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 
 	//Base function: definition must not change, but add your code
-	public int getCurrentFloorForElevator(int elevator) {
+	public int getCurrentFloorForElevator(int el) {
 
-		//dumb code, replace it!
-		return 1;
+		return elevator.getCurrentFloor();
 	}
 
 	//Base function: definition must not change, but add your code
