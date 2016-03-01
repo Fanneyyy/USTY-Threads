@@ -2,21 +2,18 @@ package com.ru.usty.elevator;
 
 public class Elevator implements Runnable {
 
-    private int numberOfPeople;
+    private int numberOfPeople, currentFloor;
     public Elevator() {
         numberOfPeople = 0;
+        currentFloor = 0;
     }
 
     public int getNumberOfPeople() {
         return numberOfPeople;
     }
 
-    public void decrementNumberOfPeople() {
-        numberOfPeople--;
-    }
-
-    public void incrementNumberOfPeople() {
-        numberOfPeople++;
+    public int getCurrentFloor() {
+        return currentFloor;
     }
 
     @Override
