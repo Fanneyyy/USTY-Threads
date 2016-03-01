@@ -17,41 +17,51 @@ public class ElevatorScene {
 	//feel free to change this.  It will be changed during grading
 	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
 
+    public static ElevatorScene scene;
+
+    // Semaphores
+    public static Semaphore exitedCountMutex;
+    public static Semaphore personCountMutex;
+    public static Semaphore elevatorWaitMutex;
+
+    public static Semaphore semaphore1;
+
+    public static boolean elevatorMayStop;
+
 	private int numberOfFloors;
 	private int numberOfElevators;
+    private Thread elevatorThread = null;
 
 	ArrayList<Integer> personCount; //use if you want but
 									//throw away and
 									//implement differently
 									//if it suits you
-									ArrayList<Integer> exitedCount = null;
-	public static Semaphore exitedCountMutex;
 
-	public void personExitsAtFloor(int floor) {
-		try {
+    ArrayList<Integer> exitedCount = null;
 
-			exitedCountMutex.acquire();
-			exitedCount.set(floor, (exitedCount.get(floor) + 1));
-			exitedCountMutex.release();
-
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	public int getExitedCountAtFloor(int floor) {
-		if(floor < getNumberOfFloors()) {
-			return exitedCount.get(floor);
-		}
-		else {
-			return 0;
-		}
-	}
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
+        elevatorMayStop = true;
+        if (elevatorThread != null) {
+            if (elevatorThread.isAlive()) {
+                try {
+                    elevatorThread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        elevatorMayStop = false;
+
+        scene = this;
+        semaphore1 = new Semaphore(0);
+        personCountMutex = new Semaphore(1);
+        elevatorWaitMutex = new Semaphore(1);
+
+        elevatorThread = new Thread(new Elevator());
+        elevatorThread.start();
 		/**
 		 * Important to add code here to make new
 		 * threads that run your elevator-runnables
@@ -86,6 +96,8 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public Thread addPerson(int sourceFloor, int destinationFloor) {
 
+        Thread thread = new Thread(new Person(sourceFloor, destinationFloor));
+        thread.start();
 		/**
 		 * Important to add code here to make a
 		 * new thread that runs your person-runnable
@@ -96,8 +108,9 @@ public class ElevatorScene {
 		 */
 
 		//dumb code, replace it!
-		personCount.set(sourceFloor, personCount.get(sourceFloor) + 1);
-		return null;  //this means that the testSuite will not wait for the threads to finish
+
+        ElevatorScene.scene.incrementNumberOfPeopleWaitingAtFloor(sourceFloor);
+        return thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 
 	//Base function: definition must not change, but add your code
@@ -123,6 +136,48 @@ public class ElevatorScene {
 
 		return personCount.get(floor);
 	}
+
+    public void decrementNumberOfPeopleWaitingAtFloor(int floor) {
+        try {
+            personCountMutex.acquire();
+            personCount.set(floor, (personCount.get(floor) - 1));
+            personCountMutex.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void incrementNumberOfPeopleWaitingAtFloor(int floor) {
+        try {
+            personCountMutex.acquire();
+            personCount.set(floor, (personCount.get(floor)+1));
+            personCountMutex.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void personExitsAtFloor(int floor) {
+        try {
+
+            exitedCountMutex.acquire();
+            exitedCount.set(floor, (exitedCount.get(floor) + 1));
+            exitedCountMutex.release();
+
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public int getExitedCountAtFloor(int floor) {
+        if(floor < getNumberOfFloors()) {
+            return exitedCount.get(floor);
+        }
+        else {
+            return 0;
+        }
+    }
 
 	//Base function: definition must not change, but add your code if needed
 	public int getNumberOfFloors() {
