@@ -12,7 +12,7 @@ public class Person implements Runnable {
     @Override
     public void run() {
         try {
-            ElevatorScene.floor1.acquire(); //waiting
+            ElevatorScene.floors.get(sourceFloor).acquire(); //waiting
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

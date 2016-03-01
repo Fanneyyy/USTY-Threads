@@ -1,5 +1,7 @@
 package com.ru.usty.elevator;
 
+import org.lwjgl.Sys;
+
 import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
@@ -22,16 +24,14 @@ public class ElevatorScene {
     // Semaphores
     public static Semaphore exitedCountMutex;
     public static Semaphore personCountMutex;
-    public static Semaphore elevatorWaitMutex;
-
-    public static Semaphore floor1;
-    public static Semaphore floor2;
+    public static ArrayList<Semaphore> floors;
 
     public static boolean elevatorMayStop;
+    public static int currentFloor;
+    public static int numberOfPeopleInElevator;
 
 	private int numberOfFloors;
 	private int numberOfElevators;
-    private Elevator elevator;
     private Thread elevatorThread = null;
 
 	ArrayList<Integer> personCount; //use if you want but
@@ -59,13 +59,16 @@ public class ElevatorScene {
         elevatorMayStop = false;
 
         scene = this;
-        floor1 = new Semaphore(0);
-        floor2 = new Semaphore(0);
+        floors = new ArrayList<Semaphore>();
+        for (int i = 0; i < numberOfFloors; i++) {
+            Semaphore temp = new Semaphore(0);
+            floors.add(temp);
+        }
         personCountMutex = new Semaphore(1);
-        elevatorWaitMutex = new Semaphore(1);
 
-        elevator = new Elevator();
-        elevatorThread = new Thread(elevator);
+        currentFloor = 0;
+        numberOfPeopleInElevator = 0;
+        elevatorThread = new Thread(new Elevator());
         elevatorThread.start();
 		/**
 		 * Important to add code here to make new
@@ -119,13 +122,13 @@ public class ElevatorScene {
 	//Base function: definition must not change, but add your code
 	public int getCurrentFloorForElevator(int el) {
 
-		return elevator.getCurrentFloor();
+		return ElevatorScene.currentFloor;
 	}
 
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleInElevator(int el) {
 		
-		return elevator.getNumberOfPeople();
+		return ElevatorScene.numberOfPeopleInElevator;
 	}
 
 	//Base function: definition must not change, but add your code
@@ -162,7 +165,6 @@ public class ElevatorScene {
             exitedCountMutex.release();
 
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
