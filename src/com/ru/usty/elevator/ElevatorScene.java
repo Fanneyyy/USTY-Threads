@@ -31,6 +31,7 @@ public class ElevatorScene {
 
 	private int numberOfFloors;
 	private int numberOfElevators;
+    private Elevator elevator;
     private Thread elevatorThread = null;
 
 	ArrayList<Integer> personCount; //use if you want but
@@ -63,7 +64,8 @@ public class ElevatorScene {
         personCountMutex = new Semaphore(1);
         elevatorWaitMutex = new Semaphore(1);
 
-        elevatorThread = new Thread(new Elevator());
+        elevator = new Elevator();
+        elevatorThread = new Thread(elevator);
         elevatorThread.start();
 		/**
 		 * Important to add code here to make new
@@ -124,14 +126,9 @@ public class ElevatorScene {
 	}
 
 	//Base function: definition must not change, but add your code
-	public int getNumberOfPeopleInElevator(int elevator) {
+	public int getNumberOfPeopleInElevator(int el) {
 		
-		//dumb code, replace it!
-		switch(elevator) {
-		case 1: return 1;
-		case 2: return 4;
-		default: return 3;
-		}
+		return elevator.getNumberOfPeople();
 	}
 
 	//Base function: definition must not change, but add your code
