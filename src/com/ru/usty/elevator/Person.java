@@ -12,11 +12,12 @@ public class Person implements Runnable {
     @Override
     public void run() {
         try {
-            ElevatorScene.semaphore1.acquire(); //waiting
+            ElevatorScene.floor1.acquire(); //waiting
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         System.out.println("Person thread finished");
         ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
+        ElevatorScene.scene.personExitsAtFloor(destinationFloor);
     }
 }

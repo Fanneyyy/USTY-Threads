@@ -24,7 +24,8 @@ public class ElevatorScene {
     public static Semaphore personCountMutex;
     public static Semaphore elevatorWaitMutex;
 
-    public static Semaphore semaphore1;
+    public static Semaphore floor1;
+    public static Semaphore floor2;
 
     public static boolean elevatorMayStop;
 
@@ -43,6 +44,7 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
+        // TODO Ask the teacher!!!
         elevatorMayStop = true;
         if (elevatorThread != null) {
             if (elevatorThread.isAlive()) {
@@ -56,7 +58,8 @@ public class ElevatorScene {
         elevatorMayStop = false;
 
         scene = this;
-        semaphore1 = new Semaphore(0);
+        floor1 = new Semaphore(0);
+        floor2 = new Semaphore(0);
         personCountMutex = new Semaphore(1);
         elevatorWaitMutex = new Semaphore(1);
 
@@ -150,7 +153,7 @@ public class ElevatorScene {
     public void incrementNumberOfPeopleWaitingAtFloor(int floor) {
         try {
             personCountMutex.acquire();
-            personCount.set(floor, (personCount.get(floor)+1));
+            personCount.set(floor, (personCount.get(floor) + 1));
             personCountMutex.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
