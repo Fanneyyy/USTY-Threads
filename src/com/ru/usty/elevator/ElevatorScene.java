@@ -30,13 +30,12 @@ public class ElevatorScene {
 
     public static boolean elevatorMayStop;
     public static int currentFloor;
-    public static int numberOfPeopleInElevator;
+    public static ArrayList<Integer> numberOfPeopleInElevator;
 
 	private int numberOfFloors;
 	private int numberOfElevators;
-    private boolean goingUp;
+    private ArrayList<Boolean> goingUp;
     private Thread elevatorThread = null;
-
 	ArrayList<Integer> personCount; //use if you want but
 									//throw away and
 									//implement differently
@@ -75,10 +74,17 @@ public class ElevatorScene {
         waitInElevatorMutex = new Semaphore(0);
 
         currentFloor = 0;
-        numberOfPeopleInElevator = 0;
-        goingUp = true;
-        elevatorThread = new Thread(new Elevator());
-        elevatorThread.start();
+        goingUp = new ArrayList<Boolean>();
+        numberOfPeopleInElevator = new ArrayList<Integer>();
+        for (int i = 0; i < numberOfElevators; i++) {
+            elevatorThread = new Thread(new Elevator(i));
+            elevatorThread.start();
+            numberOfPeopleInElevator.add(0);
+            goingUp.add(true);
+        }
+
+        System.out.println(numberOfPeopleInElevator.get(0));
+
 		/**
 		 * Important to add code here to make new
 		 * threads that run your elevator-runnables
@@ -128,13 +134,13 @@ public class ElevatorScene {
         return thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 
-    public void goToNextFloor() {
+    public void goToNextFloor(int el) {
         if (ElevatorScene.currentFloor >= (this.numberOfFloors-1)) {
-            goingUp = false;
+            goingUp.set(el, false);
         } else if (ElevatorScene.currentFloor <= 0) {
-            goingUp = true;
+            goingUp.set(el, true);
         }
-        if (goingUp) {
+        if (goingUp.get(el)) {
             currentFloor++;
         } else {
             currentFloor--;
@@ -148,23 +154,23 @@ public class ElevatorScene {
 
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleInElevator(int el) {
-		return numberOfPeopleInElevator;
+		return numberOfPeopleInElevator.get(0);
 	}
 
-    public void decrementNumberOfPeopleInElevator(int floor) {
+    public void decrementNumberOfPeopleInElevator(int el) {
         try {
             personCountMutex.acquire();
-            numberOfPeopleInElevator--;
+            numberOfPeopleInElevator.set(el, (numberOfPeopleInElevator.get(el) - 1));
             personCountMutex.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    public void incrementNumberOfPeopleInElevator(int floor) {
+    public void incrementNumberOfPeopleInElevator(int el) {
         try {
             personCountMutex.acquire();
-            numberOfPeopleInElevator++;
+            numberOfPeopleInElevator.set(el, (numberOfPeopleInElevator.get(el) + 1));
             personCountMutex.release();
         } catch (InterruptedException e) {
             e.printStackTrace();

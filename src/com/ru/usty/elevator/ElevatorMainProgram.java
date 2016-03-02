@@ -11,24 +11,12 @@ public class ElevatorMainProgram {
 
 /***EXPERIMENT HERE BUT THIS WILL BE CHANGED DURING GRADING***/
 
-			//Thread.sleep(1000);
+			Thread.sleep(2000);
 
-			//TestSuite.runTest(0);
-
-			//Thread.sleep(1000);
-
-			//TestSuite.runTest(1);
-
-			Thread.sleep(1000);
-
-            TestSuite.runTest(3);
-
-            Thread.sleep(2000);
-
-		//	for(int i = 0; i <= 4; i++) {
-		//		TestSuite.runTest(i);
-		//		Thread.sleep(2000);
-		//	}
+			for(int i = 2; i <= 4; i++) {
+				TestSuite.runTest(i);
+				Thread.sleep(2000);
+			}
 
 /*************************************************************/
 
