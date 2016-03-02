@@ -24,6 +24,7 @@ public class ElevatorScene {
     // Semaphores
     public static Semaphore exitedCountMutex;
     public static Semaphore personCountMutex;
+    public static Semaphore waitInElevatorMutex;
     public static ArrayList<Semaphore> floors;
 
     public static boolean elevatorMayStop;
@@ -65,6 +66,7 @@ public class ElevatorScene {
             floors.add(temp);
         }
         personCountMutex = new Semaphore(1);
+        waitInElevatorMutex = new Semaphore(0);
 
         currentFloor = 0;
         numberOfPeopleInElevator = 0;
@@ -119,17 +121,43 @@ public class ElevatorScene {
         return thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 
+    public void goToNextFloor() {
+        if (ElevatorScene.currentFloor >= (this.numberOfFloors-1)) {
+            ElevatorScene.currentFloor--;
+        } else {
+            ElevatorScene.currentFloor++;
+        }
+    }
+
 	//Base function: definition must not change, but add your code
 	public int getCurrentFloorForElevator(int el) {
-
-		return ElevatorScene.currentFloor;
+		return currentFloor;
 	}
 
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleInElevator(int el) {
-		
-		return ElevatorScene.numberOfPeopleInElevator;
+		return numberOfPeopleInElevator;
 	}
+
+    public void decrementNumberOfPeopleInElevator(int floor) {
+        try {
+            personCountMutex.acquire();
+            numberOfPeopleInElevator--;
+            personCountMutex.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void incrementNumberOfPeopleInElevator(int floor) {
+        try {
+            personCountMutex.acquire();
+            numberOfPeopleInElevator++;
+            personCountMutex.release();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleWaitingAtFloor(int floor) {

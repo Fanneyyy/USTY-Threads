@@ -12,7 +12,10 @@ public class Person implements Runnable {
     @Override
     public void run() {
         try {
-            ElevatorScene.floors.get(sourceFloor).acquire(); //waiting
+            ElevatorScene.floors.get(sourceFloor).acquire(); //waiting for elevator
+            ElevatorScene.scene.incrementNumberOfPeopleInElevator(0);
+            ElevatorScene.waitInElevatorMutex.acquire(); //waiting in elevator
+            ElevatorScene.floors.get(destinationFloor).acquire(); //waiting to leave elevator on correct floor
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -20,5 +23,6 @@ public class Person implements Runnable {
         ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
         System.out.println("Climing up elevator shaft");
         ElevatorScene.scene.personExitsAtFloor(destinationFloor);
+        ElevatorScene.scene.decrementNumberOfPeopleInElevator(0);
     }
 }
