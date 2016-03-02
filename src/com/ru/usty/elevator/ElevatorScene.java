@@ -135,11 +135,27 @@ public class ElevatorScene {
 	}
 
     public void goToNextFloor(int el) {
+        if (goingUp.get(el) && getNumberOfPeopleInElevator(el) == 0) {
+            goingUp.set(el, false);
+            for (int i = getCurrentFloorForElevator(el); i < getNumberOfFloors(); i++) {
+                if (isButtonPushedAtFloor(i)) {
+                    goingUp.set(el, true);
+                }
+            }
+        } else if (!goingUp.get(el) && getNumberOfPeopleInElevator(el) == 0) {
+            goingUp.set(el, true);
+            for (int i = getCurrentFloorForElevator(el); i >= 0; i--) {
+                if (isButtonPushedAtFloor(i)) {
+                    goingUp.set(el, false);
+                }
+            }
+        }
         if (ElevatorScene.currentFloor >= (this.numberOfFloors-1)) {
             goingUp.set(el, false);
         } else if (ElevatorScene.currentFloor <= 0) {
             goingUp.set(el, true);
         }
+
         if (goingUp.get(el)) {
             currentFloor++;
         } else {
