@@ -21,6 +21,7 @@ public class Elevator implements Runnable {
 
             ElevatorScene.waitInElevatorMutex.release(ElevatorScene.numberOfPeopleInElevator);
             waitAmoment();
+
             ElevatorScene.waitInElevatorMutex.tryAcquire(ElevatorScene.numberOfPeopleInElevator);
 
             ElevatorScene.floorsOut.get(ElevatorScene.currentFloor).release(ElevatorScene.numberOfPeopleInElevator);
