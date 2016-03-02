@@ -48,7 +48,6 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 
-        // TODO Ask the teacher!!!
         elevatorMayStop = true;
         if (elevatorThread != null) {
             if (elevatorThread.isAlive()) {

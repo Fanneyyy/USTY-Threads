@@ -6,27 +6,26 @@ public class Elevator implements Runnable {
     public void run() {
         while (true) {
             if (ElevatorScene.elevatorMayStop) {
-                System.out.println("elevator may stop");
                 return;
             }
             int roomInElevator = 6 - ElevatorScene.numberOfPeopleInElevator;
             if (roomInElevator > ElevatorScene.scene.personCount.get(ElevatorScene.currentFloor)) {
                 roomInElevator = ElevatorScene.scene.personCount.get(ElevatorScene.currentFloor);
             }
-            for (int i = 0; i < roomInElevator; i++) {
-                ElevatorScene.floorsIn.get(ElevatorScene.currentFloor).release();
-            }
+
+            ElevatorScene.floorsIn.get(ElevatorScene.currentFloor).release(roomInElevator);
             waitAmoment();
+
             ElevatorScene.scene.goToNextFloor();
             waitAmoment();
-            for (int i = 0; i < ElevatorScene.numberOfPeopleInElevator; i++) {
-                ElevatorScene.waitInElevatorMutex.release();
-            }
+
+            ElevatorScene.waitInElevatorMutex.release(ElevatorScene.numberOfPeopleInElevator);
             waitAmoment();
-            int peopleInElevator = ElevatorScene.numberOfPeopleInElevator;
-            for (int i = 0; i < peopleInElevator; i++) {
-                ElevatorScene.floorsOut.get(ElevatorScene.currentFloor).release();
-            }
+            ElevatorScene.waitInElevatorMutex.tryAcquire(ElevatorScene.numberOfPeopleInElevator);
+
+            ElevatorScene.floorsOut.get(ElevatorScene.currentFloor).release(ElevatorScene.numberOfPeopleInElevator);
+            waitAmoment();
+            ElevatorScene.floorsOut.get(ElevatorScene.currentFloor).tryAcquire(ElevatorScene.numberOfPeopleInElevator);
         }
     }
 
