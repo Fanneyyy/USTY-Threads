@@ -17,6 +17,7 @@ public class Elevator implements Runnable {
                 ElevatorScene.floorsIn.get(ElevatorScene.currentFloor).release();
             }
             waitAmoment();
+            ElevatorScene.floorsIn.get(ElevatorScene.currentFloor).release(0);
             ElevatorScene.scene.goToNextFloor();
             waitAmoment();
             for (int i = 0; i < ElevatorScene.numberOfPeopleInElevator; i++) {
@@ -26,6 +27,10 @@ public class Elevator implements Runnable {
             int peopleInElevator = ElevatorScene.numberOfPeopleInElevator;
             for (int i = 0; i < peopleInElevator; i++) {
                 ElevatorScene.floorsOut.get(ElevatorScene.currentFloor).release();
+            }
+            waitAmoment();
+            while(ElevatorScene.floorsOut.get(ElevatorScene.currentFloor).tryAcquire()) {
+
             }
         }
     }
