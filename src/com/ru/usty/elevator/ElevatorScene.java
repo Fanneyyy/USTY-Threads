@@ -25,7 +25,8 @@ public class ElevatorScene {
     public static Semaphore exitedCountMutex;
     public static Semaphore personCountMutex;
     public static Semaphore waitInElevatorMutex;
-    public static ArrayList<Semaphore> floors;
+    public static ArrayList<Semaphore> floorsIn;
+    public static ArrayList<Semaphore> floorsOut;
 
     public static boolean elevatorMayStop;
     public static int currentFloor;
@@ -33,6 +34,7 @@ public class ElevatorScene {
 
 	private int numberOfFloors;
 	private int numberOfElevators;
+    private boolean goingUp;
     private Thread elevatorThread = null;
 
 	ArrayList<Integer> personCount; //use if you want but
@@ -60,16 +62,22 @@ public class ElevatorScene {
         elevatorMayStop = false;
 
         scene = this;
-        floors = new ArrayList<Semaphore>();
+        floorsIn = new ArrayList<Semaphore>();
         for (int i = 0; i < numberOfFloors; i++) {
             Semaphore temp = new Semaphore(0);
-            floors.add(temp);
+            floorsIn.add(temp);
+        }
+        floorsOut = new ArrayList<Semaphore>();
+        for (int i = 0; i < numberOfFloors; i++) {
+            Semaphore temp = new Semaphore(0);
+            floorsOut.add(temp);
         }
         personCountMutex = new Semaphore(1);
         waitInElevatorMutex = new Semaphore(0);
 
         currentFloor = 0;
         numberOfPeopleInElevator = 0;
+        goingUp = true;
         elevatorThread = new Thread(new Elevator());
         elevatorThread.start();
 		/**
@@ -123,9 +131,14 @@ public class ElevatorScene {
 
     public void goToNextFloor() {
         if (ElevatorScene.currentFloor >= (this.numberOfFloors-1)) {
-            ElevatorScene.currentFloor--;
+            goingUp = false;
+        } else if (ElevatorScene.currentFloor <= 0) {
+            goingUp = true;
+        }
+        if (goingUp) {
+            currentFloor++;
         } else {
-            ElevatorScene.currentFloor++;
+            currentFloor--;
         }
     }
 
