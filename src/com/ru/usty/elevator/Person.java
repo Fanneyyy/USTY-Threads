@@ -15,7 +15,7 @@ public class Person implements Runnable {
 
             ElevatorScene.floorsIn.get(sourceFloor).acquire(); //waiting for elevator
 
-            this.elevator = ElevatorController.elevatorPick();
+            this.elevator = ElevatorController.elevatorPick(sourceFloor);
 
             ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
 
