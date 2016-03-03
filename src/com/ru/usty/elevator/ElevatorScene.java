@@ -18,9 +18,9 @@ public class ElevatorScene {
 
 	//TO SPEED THINGS UP WHEN TESTING,
 	//feel free to change this.  It will be changed during grading
-	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 400;  //milliseconds
     public static final int MAX_IN_ELEVATOR = 6;
-    public static final int MAX_IN_ELEVATOR_ON_TOP_AND_BOT = 4;
+    public static final int MAX_IN_ELEVATOR_ON_TOP_AND_BOT = 4; // for top and bottom floor to stop starving middle
 
     public static ElevatorScene scene;
 
@@ -31,16 +31,16 @@ public class ElevatorScene {
     public static ArrayList<Semaphore> waitInElevatorMutex;
     public static ArrayList<Semaphore> floorsInGoingUp;
     public static ArrayList<Semaphore> floorsInGoingDown;
-
     public static ArrayList<ArrayList<Semaphore>> floorsOut;
 
+    // public
     public static boolean elevatorMayStop;
     public static int elevatorOpen;
     public static ArrayList<Integer> currentFloor;
     public static ArrayList<Integer> numberOfPeopleInElevator;
     public ArrayList<Boolean> goingUp;
 
-
+    // private
     private int numberOfFloors;
 	private int numberOfElevators;
     private Thread elevatorThread = null;
@@ -48,7 +48,6 @@ public class ElevatorScene {
 									//throw away and
 									//implement differently
 									//if it suits you
-
 	ArrayList<Integer> personsGoingUp;
     ArrayList<Integer> personsGoingDown;
     ArrayList<Integer> exitedCount = null;
@@ -56,7 +55,7 @@ public class ElevatorScene {
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
-        Random random = new Random(234645236);
+        Random random = new Random(234645236); // to make elevator start at random floor (primarily for multiple elevators)
 
         elevatorMayStop = true;
         if (elevatorThread != null) {
@@ -72,6 +71,7 @@ public class ElevatorScene {
         elevatorOpen = 0;
 
         scene = this;
+
         floorsInGoingUp = new ArrayList<Semaphore>();
         floorsInGoingDown = new ArrayList<Semaphore>();
         for (int i = 0; i < numberOfFloors; i++) {
@@ -91,7 +91,6 @@ public class ElevatorScene {
         for (int i = 0 ; i < numberOfElevators; i++) {
             floorsOut.add(new ArrayList<Semaphore>());
             waitInElevatorMutex.add(new Semaphore(0));
-
             for (int j = 0; j < numberOfFloors; j++) {
                 floorsOut.get(i).add(new Semaphore(0));
 
@@ -164,6 +163,7 @@ public class ElevatorScene {
         return thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 
+    // elevator will not go up or down if it is empty and there are no people to get
     public void goToNextFloor(int el) {
         if (goingUp.get(el) && getNumberOfPeopleInElevator(el) == 0) {
             goingUp.set(el, false);
@@ -197,6 +197,15 @@ public class ElevatorScene {
                 goingUp.set(el, true);
             }
         }
+    }
+
+    public boolean areAllMiddleFloorsEmpty() {
+        for (int i = 1; i < ElevatorScene.scene.getNumberOfFloors()-1; i++) {
+            if (ElevatorScene.scene.isButtonPushedAtFloor(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 	//Base function: definition must not change, but add your code

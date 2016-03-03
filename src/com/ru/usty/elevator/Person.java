@@ -9,6 +9,7 @@ public class Person implements Runnable {
         this.sourceFloor = sourceFloor;
         this.destinationFloor = destinationFloor;
         this.elevator = 0;
+        // Added to know whether a person is going up or down
         if (destinationFloor > sourceFloor) {
             this.goingUp = true;
         } else {
@@ -24,7 +25,7 @@ public class Person implements Runnable {
             } else {
                 ElevatorScene.floorsInGoingDown.get(sourceFloor).acquire(); //waiting for elevator, going down
             }
-            this.elevator = ElevatorScene.elevatorOpen;
+            this.elevator = ElevatorScene.elevatorOpen; // find the elevator the person entered
 
             ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor, goingUp);
             ElevatorScene.scene.incrementNumberOfPeopleInElevator(elevator);
