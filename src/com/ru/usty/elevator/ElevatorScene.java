@@ -3,6 +3,7 @@ package com.ru.usty.elevator;
 import org.lwjgl.Sys;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -29,7 +30,7 @@ public class ElevatorScene {
     public static ArrayList<Semaphore> floorsOut;
 
     public static boolean elevatorMayStop;
-    public static int currentFloor;
+    public static ArrayList<Integer> currentFloor;
     public static ArrayList<Integer> numberOfPeopleInElevator;
 
 	private int numberOfFloors;
@@ -46,6 +47,8 @@ public class ElevatorScene {
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
+        Random random = new Random(234645236);
+
 
         elevatorMayStop = true;
         if (elevatorThread != null) {
@@ -73,14 +76,17 @@ public class ElevatorScene {
         personCountMutex = new Semaphore(1);
         waitInElevatorMutex = new Semaphore(0);
 
-        currentFloor = 0;
         goingUp = new ArrayList<Boolean>();
         numberOfPeopleInElevator = new ArrayList<Integer>();
+        currentFloor = new ArrayList<Integer>();
         for (int i = 0; i < numberOfElevators; i++) {
+            int elevatorSpawn =  random.nextInt((numberOfFloors - 1) + 1);
             elevatorThread = new Thread(new Elevator(i));
             elevatorThread.start();
             numberOfPeopleInElevator.add(0);
             goingUp.add(true);
+            System.out.println("elevatorSpawn : " + elevatorSpawn);
+            currentFloor.add(elevatorSpawn);
         }
 
         System.out.println(numberOfPeopleInElevator.get(0));
@@ -150,22 +156,22 @@ public class ElevatorScene {
                 }
             }
         }
-        if (ElevatorScene.currentFloor >= (this.numberOfFloors-1)) {
+        if (ElevatorScene.currentFloor.get(el) >= (this.numberOfFloors-1)) {
             goingUp.set(el, false);
-        } else if (ElevatorScene.currentFloor <= 0) {
+        } else if (ElevatorScene.currentFloor.get(el) <= 0) {
             goingUp.set(el, true);
         }
 
         if (goingUp.get(el)) {
-            currentFloor++;
+            currentFloor.set(el, (currentFloor.get(el) + 1));
         } else {
-            currentFloor--;
+            currentFloor.set(el, (currentFloor.get(el) - 1));
         }
     }
 
 	//Base function: definition must not change, but add your code
 	public int getCurrentFloorForElevator(int el) {
-		return currentFloor;
+		return currentFloor.get(el);
 	}
 
 	//Base function: definition must not change, but add your code
