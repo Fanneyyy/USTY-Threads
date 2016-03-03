@@ -3,6 +3,7 @@ package com.ru.usty.elevator;
 import com.ru.usty.elevator.visualization.TestSuite;
 
 public class ElevatorMainProgram {
+
 	public static void main(String[] args) {
 
 		try {
@@ -15,7 +16,6 @@ public class ElevatorMainProgram {
 
 			TestSuite.runTest(4);
 			Thread.sleep(2000);
-
 
 
 /*************************************************************/

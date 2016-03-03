@@ -1,11 +1,11 @@
 package com.ru.usty.elevator;
 
 public class Elevator implements Runnable {
-    int myNumber;
-
+    int myNumber, roomInElevator;
 
     public Elevator(int elevatorNumber) {
         this.myNumber = elevatorNumber;
+        this.roomInElevator = ElevatorScene.MAX_IN_ELEVATOR;
     }
     @Override
     public void run() {
@@ -13,21 +13,37 @@ public class Elevator implements Runnable {
             if (ElevatorScene.elevatorMayStop) {
                 return;
             }
-            int roomInElevator = 6 - ElevatorScene.numberOfPeopleInElevator.get(myNumber);
-            waitAmoment();
-
-            if (ElevatorScene.scene.goingUp.get(myNumber)) {
-                if (roomInElevator > ElevatorScene.scene.personsGoingUp.get(ElevatorScene.currentFloor.get(myNumber))) {
-                    roomInElevator = ElevatorScene.scene.personsGoingUp.get(ElevatorScene.currentFloor.get(myNumber));
-                }
-                ElevatorScene.floorsInGoingUp.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
+            if (ElevatorScene.scene.isButtonPushedAtFloor(1) &&
+                    (ElevatorScene.currentFloor.get(myNumber) == 0 ||
+                    ElevatorScene.currentFloor.get(myNumber) == (ElevatorScene.scene.getNumberOfFloors()-1))) {
+                roomInElevator = ElevatorScene.MAX_IN_ELEVATOR_ON_TOP_AND_BOT - ElevatorScene.numberOfPeopleInElevator.get(myNumber);
             } else {
-                if (roomInElevator > ElevatorScene.scene.personsGoingDown.get(ElevatorScene.currentFloor.get(myNumber))) {
-                    roomInElevator = ElevatorScene.scene.personsGoingDown.get(ElevatorScene.currentFloor.get(myNumber));
-                }
-                ElevatorScene.floorsInGoingDown.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
+                roomInElevator = ElevatorScene.MAX_IN_ELEVATOR - ElevatorScene.numberOfPeopleInElevator.get(myNumber);
             }
             waitAmoment();
+
+            if (roomInElevator >= 0) {
+                try {
+                    ElevatorScene.elevatorOpenMutex.acquire();
+                    ElevatorScene.elevatorOpen = myNumber;
+                    if (ElevatorScene.scene.goingUp.get(myNumber)) {
+                        if (roomInElevator > ElevatorScene.scene.personsGoingUp.get(ElevatorScene.currentFloor.get(myNumber))) {
+                            roomInElevator = ElevatorScene.scene.personsGoingUp.get(ElevatorScene.currentFloor.get(myNumber));
+                        }
+                        ElevatorScene.floorsInGoingUp.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
+                    } else {
+                        if (roomInElevator > ElevatorScene.scene.personsGoingDown.get(ElevatorScene.currentFloor.get(myNumber))) {
+                            roomInElevator = ElevatorScene.scene.personsGoingDown.get(ElevatorScene.currentFloor.get(myNumber));
+                        }
+                        ElevatorScene.floorsInGoingDown.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
+                    }
+                    waitAmoment();
+                    ElevatorScene.elevatorOpenMutex.release();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                waitAmoment();
+            }
 
             ElevatorScene.scene.goToNextFloor(myNumber);
             waitAmoment();
@@ -44,7 +60,7 @@ public class Elevator implements Runnable {
     }
     private void waitAmoment() {
         try {
-            Thread.sleep(600);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

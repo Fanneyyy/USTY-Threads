@@ -19,12 +19,15 @@ public class ElevatorScene {
 	//TO SPEED THINGS UP WHEN TESTING,
 	//feel free to change this.  It will be changed during grading
 	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
+    public static final int MAX_IN_ELEVATOR = 6;
+    public static final int MAX_IN_ELEVATOR_ON_TOP_AND_BOT = 4;
 
     public static ElevatorScene scene;
 
     // Semaphores
     public static ArrayList<Semaphore> exitedCountMutex;
     public static Semaphore personCountMutex;
+    public static Semaphore elevatorOpenMutex;
     public static ArrayList<Semaphore> waitInElevatorMutex;
     public static ArrayList<Semaphore> floorsInGoingUp;
     public static ArrayList<Semaphore> floorsInGoingDown;
@@ -32,6 +35,7 @@ public class ElevatorScene {
     public static ArrayList<ArrayList<Semaphore>> floorsOut;
 
     public static boolean elevatorMayStop;
+    public static int elevatorOpen;
     public static ArrayList<Integer> currentFloor;
     public static ArrayList<Integer> numberOfPeopleInElevator;
     public ArrayList<Boolean> goingUp;
@@ -65,6 +69,7 @@ public class ElevatorScene {
             }
         }
         elevatorMayStop = false;
+        elevatorOpen = 0;
 
         scene = this;
         floorsInGoingUp = new ArrayList<Semaphore>();
@@ -75,6 +80,7 @@ public class ElevatorScene {
 
         }
         personCountMutex = new Semaphore(1);
+        elevatorOpenMutex = new Semaphore(1);
         waitInElevatorMutex = new ArrayList<Semaphore>();
 
         goingUp = new ArrayList<Boolean>();
@@ -122,8 +128,6 @@ public class ElevatorScene {
             elevatorThread.start();
         }
 
-        System.out.println(numberOfPeopleInElevator.get(0));
-
 		/**
 		 * Important to add code here to make new
 		 * threads that run your elevator-runnables
@@ -152,7 +156,6 @@ public class ElevatorScene {
 		 * so that it can be reaped in the testSuite
 		 * (you don't have to join() yourself)
 		 */
-        System.out.println("Person going up: " + goingUp);
         if (person.goingUp) {
             ElevatorScene.scene.incrementNumberOfPeopleWaitingAtFloor(sourceFloor, true);
         } else {

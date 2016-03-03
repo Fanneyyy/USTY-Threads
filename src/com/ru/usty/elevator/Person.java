@@ -19,12 +19,12 @@ public class Person implements Runnable {
     @Override
     public void run() {
         try {
-            this.elevator = ElevatorController.elevatorPick(sourceFloor);
             if (goingUp) {
                 ElevatorScene.floorsInGoingUp.get(sourceFloor).acquire(); //waiting for elevator, going up
             } else {
                 ElevatorScene.floorsInGoingDown.get(sourceFloor).acquire(); //waiting for elevator, going down
             }
+            this.elevator = ElevatorScene.elevatorOpen;
 
             ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor, goingUp);
             ElevatorScene.scene.incrementNumberOfPeopleInElevator(elevator);
