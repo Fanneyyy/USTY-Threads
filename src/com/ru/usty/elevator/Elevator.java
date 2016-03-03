@@ -20,7 +20,7 @@ public class Elevator implements Runnable {
                 roomInElevator = ElevatorScene.scene.personCount.get(ElevatorScene.currentFloor.get(myNumber));
             }
 
-            System.out.println("currentFloor " + ElevatorScene.currentFloor);
+            System.out.println("Room In Elevator " + roomInElevator);
 
             ElevatorScene.floorsIn.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
             waitAmoment();
@@ -28,13 +28,15 @@ public class Elevator implements Runnable {
             ElevatorScene.scene.goToNextFloor(myNumber);
             waitAmoment();
 
-            ElevatorScene.waitInElevatorMutex.release(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
+            ElevatorScene.waitInElevatorMutex.get(myNumber).release(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
             waitAmoment();
 
-            ElevatorScene.waitInElevatorMutex.tryAcquire(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
+            ElevatorScene.waitInElevatorMutex.get(myNumber).tryAcquire(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
 
             ElevatorScene.floorsOut.get(ElevatorScene.currentFloor.get(myNumber)).release(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
             waitAmoment();
+            System.out.println("Number of people in elevator " + ElevatorScene.numberOfPeopleInElevator.get(myNumber));
+
             ElevatorScene.floorsOut.get(ElevatorScene.currentFloor.get(myNumber)).tryAcquire(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
         }
     }

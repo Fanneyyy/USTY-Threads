@@ -2,7 +2,7 @@ package com.ru.usty.elevator;
 
 public class Person implements Runnable {
 
-    int sourceFloor, destinationFloor;
+    int sourceFloor, destinationFloor, elevator;
 
     public Person(int sourceFloor, int destinationFloor) {
         this.sourceFloor = sourceFloor;
@@ -15,19 +15,20 @@ public class Person implements Runnable {
 
             ElevatorScene.floorsIn.get(sourceFloor).acquire(); //waiting for elevator
 
+            this.elevator = ElevatorController.elevatorPick();
+
             ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
 
+            ElevatorScene.scene.incrementNumberOfPeopleInElevator(elevator);
 
-            ElevatorScene.scene.incrementNumberOfPeopleInElevator(ElevatorController.elevatorPick());
-
-            ElevatorScene.waitInElevatorMutex.acquire(); //waiting in elevator
+            ElevatorScene.waitInElevatorMutex.get(elevator).acquire(); //waiting in elevator
 
             ElevatorScene.floorsOut.get(destinationFloor).acquire(); //waiting to leave elevator on correct floor
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        ElevatorScene.scene.personExitsAtFloor(destinationFloor);
-        ElevatorScene.scene.decrementNumberOfPeopleInElevator(0);
+        ElevatorScene.scene.personExitsAtFloor(destinationFloor, elevator);
+        ElevatorScene.scene.decrementNumberOfPeopleInElevator(elevator);
     }
 }
