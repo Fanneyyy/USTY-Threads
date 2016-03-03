@@ -13,17 +13,18 @@ public class Person implements Runnable {
         } else {
             this.goingUp = false;
         }
-        this.elevator = -1;
     }
 
     @Override
     public void run() {
         try {
-            while (this.elevator == -1) {
-                this.elevator = ElevatorController.elevatorPick(sourceFloor, goingUp);
+            //this.elevator = ElevatorController.elevatorPick(sourceFloor);
+            this.elevator = 0;
+            if (goingUp) {
+                ElevatorScene.floorsInGoingUp.get(sourceFloor).acquire(); //waiting for elevator
+            } else {
+                ElevatorScene.floorsInGoingDown.get(sourceFloor).acquire(); //waiting for elevator
             }
-
-            ElevatorScene.floorsIn.get(sourceFloor).acquire(); //waiting for elevator
 
             ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
 

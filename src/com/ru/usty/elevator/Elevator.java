@@ -26,8 +26,11 @@ public class Elevator implements Runnable {
 
 
             System.out.println("Room In Elevator " + roomInElevator);
-
-            ElevatorScene.floorsIn.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
+            if (ElevatorScene.scene.goingUp.get(myNumber)) {
+                ElevatorScene.floorsInGoingUp.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
+            } else {
+                ElevatorScene.floorsInGoingDown.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
+            }
             waitAmoment();
 
             ElevatorScene.scene.goToNextFloor(myNumber);
