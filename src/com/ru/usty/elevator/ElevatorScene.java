@@ -3,6 +3,9 @@ package com.ru.usty.elevator;
 import org.lwjgl.Sys;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -24,17 +27,21 @@ public class ElevatorScene {
     // Semaphores
     public static Semaphore exitedCountMutex;
     public static Semaphore personCountMutex;
-    public static Semaphore waitInElevatorMutex;
+    public static Semaphore openingDoorMutex;
+    public static ArrayList<Semaphore> waitInElevatorMutex;
     public static ArrayList<Semaphore> floorsIn;
-    public static ArrayList<Semaphore> floorsOut;
+    public static ArrayList<ArrayList<Semaphore>> floorsOut;
+    public static ArrayList<Elevator> elevators;
 
     public static boolean elevatorMayStop;
-    public static int currentFloor;
-    public static int numberOfPeopleInElevator;
+    public int elevatorOpen;
+    ArrayList<Integer> currentFloor;
+    ArrayList<Integer> numberOfPeopleInElevator;
+    ArrayList<Thread> elevatorThreads;
 
 	private int numberOfFloors;
 	private int numberOfElevators;
-    private boolean goingUp;
+    ArrayList<Boolean> goingUp;
     private Thread elevatorThread = null;
 
 	ArrayList<Integer> personCount; //use if you want but
@@ -59,26 +66,31 @@ public class ElevatorScene {
             }
         }
         elevatorMayStop = false;
+        elevatorOpen = -1;
 
         scene = this;
         floorsIn = new ArrayList<Semaphore>();
         for (int i = 0; i < numberOfFloors; i++) {
-            Semaphore temp = new Semaphore(0);
-            floorsIn.add(temp);
+            floorsIn.add(new Semaphore(0));
         }
-        floorsOut = new ArrayList<Semaphore>();
-        for (int i = 0; i < numberOfFloors; i++) {
-            Semaphore temp = new Semaphore(0);
-            floorsOut.add(temp);
+        floorsOut = new ArrayList<ArrayList<Semaphore>>();
+        waitInElevatorMutex = new ArrayList<Semaphore>();
+        for (int i = 0 ; i < numberOfElevators; i++) {
+            floorsOut.add(new ArrayList<Semaphore>());
+            waitInElevatorMutex.add(new Semaphore(0));
+            for (int j = 0; j < numberOfFloors; j++) {
+                floorsOut.get(i).add(new Semaphore(0));
+            }
         }
         personCountMutex = new Semaphore(1);
-        waitInElevatorMutex = new Semaphore(0);
+        openingDoorMutex = new Semaphore(1);
 
-        currentFloor = 0;
-        numberOfPeopleInElevator = 0;
-        goingUp = true;
-        elevatorThread = new Thread(new Elevator());
-        elevatorThread.start();
+        goingUp = new ArrayList<Boolean>();
+        numberOfPeopleInElevator = new ArrayList<Integer>();
+        currentFloor = new ArrayList<Integer>();
+        elevators = new ArrayList<Elevator>();
+        elevatorThreads = new ArrayList<Thread>();
+
 		/**
 		 * Important to add code here to make new
 		 * threads that run your elevator-runnables
@@ -107,6 +119,15 @@ public class ElevatorScene {
 			this.exitedCount.add(0);
 		}
 		exitedCountMutex = new Semaphore(1);
+
+        for (int i = 0; i < numberOfElevators; i++) {
+            numberOfPeopleInElevator.add(0);
+            currentFloor.add(0);
+            goingUp.add(true);
+            elevators.add(new Elevator(i));
+            elevatorThreads.add(new Thread(elevators.get(i)));
+            elevatorThreads.get(i).start();
+        }
 	}
 
 	//Base function: definition must not change
@@ -128,43 +149,46 @@ public class ElevatorScene {
         return thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 
-    public void goToNextFloor() {
-        if (ElevatorScene.currentFloor >= (this.numberOfFloors-1)) {
-            goingUp = false;
-        } else if (ElevatorScene.currentFloor <= 0) {
-            goingUp = true;
+    public void goToNextFloor(Elevator elevator) {
+        int index = elevators.indexOf(elevator);
+        if (currentFloor.get(index) >= (this.numberOfFloors-1)) {
+            goingUp.set(index, false);
+        } else if (currentFloor.get(index) <= 0) {
+            goingUp.set(index, true);
         }
-        if (goingUp) {
-            currentFloor++;
+        if (goingUp.get(index)) {
+            currentFloor.set(index, currentFloor.get(index)+1);
         } else {
-            currentFloor--;
+            currentFloor.set(index, currentFloor.get(index)-1);
         }
     }
 
 	//Base function: definition must not change, but add your code
-	public int getCurrentFloorForElevator(int el) {
-		return currentFloor;
+	public int getCurrentFloorForElevator(int index) {
+		return currentFloor.get(index);
 	}
 
 	//Base function: definition must not change, but add your code
-	public int getNumberOfPeopleInElevator(int el) {
-		return numberOfPeopleInElevator;
+	public int getNumberOfPeopleInElevator(int index) {
+		return numberOfPeopleInElevator.get(index);
 	}
 
-    public void decrementNumberOfPeopleInElevator(int floor) {
+    public void decrementNumberOfPeopleInElevator(Elevator elevator) {
+        int index = elevators.indexOf(elevator);
         try {
             personCountMutex.acquire();
-            numberOfPeopleInElevator--;
+            numberOfPeopleInElevator.set(index, numberOfPeopleInElevator.get(index)-1);
             personCountMutex.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    public void incrementNumberOfPeopleInElevator(int floor) {
+    public void incrementNumberOfPeopleInElevator(Elevator elevator) {
+        int index = elevators.indexOf(elevator);
         try {
             personCountMutex.acquire();
-            numberOfPeopleInElevator++;
+            numberOfPeopleInElevator.set(index, numberOfPeopleInElevator.get(index)+1);
             personCountMutex.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -241,9 +265,9 @@ public class ElevatorScene {
 	//Base function: no need to change unless you choose
 	//				 not to "open the doors" sometimes
 	//				 even though there are people there
-	public boolean isElevatorOpen(int elevator) {
+	public boolean isElevatorOpen(int index) {
 
-		return isButtonPushedAtFloor(getCurrentFloorForElevator(elevator));
+		return isButtonPushedAtFloor(getCurrentFloorForElevator(index));
 	}
 	//Base function: no need to change, just for visualization
 	//Feel free to use it though, if it helps
