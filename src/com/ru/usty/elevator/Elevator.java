@@ -13,7 +13,13 @@ public class Elevator implements Runnable {
             if (ElevatorScene.elevatorMayStop) {
                 return;
             }
-            if (ElevatorScene.scene.isButtonPushedAtFloor(1) &&
+            boolean middleFloors = false;
+            for (int i = 1; i < ElevatorScene.scene.getNumberOfFloors()-1; i++) {
+                if (ElevatorScene.scene.isButtonPushedAtFloor(i)) {
+                    middleFloors = true;
+                }
+            }
+            if (middleFloors &&
                     (ElevatorScene.currentFloor.get(myNumber) == 0 ||
                     ElevatorScene.currentFloor.get(myNumber) == (ElevatorScene.scene.getNumberOfFloors()-1))) {
                 roomInElevator = ElevatorScene.MAX_IN_ELEVATOR_ON_TOP_AND_BOT - ElevatorScene.numberOfPeopleInElevator.get(myNumber);
