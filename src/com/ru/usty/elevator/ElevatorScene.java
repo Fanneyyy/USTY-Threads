@@ -26,7 +26,9 @@ public class ElevatorScene {
     public static ArrayList<Semaphore> exitedCountMutex;
     public static Semaphore personCountMutex;
     public static ArrayList<Semaphore> waitInElevatorMutex;
-    public static ArrayList<Semaphore> floorsIn;
+    public static ArrayList<Semaphore> floorsInGoingUp;
+    public static ArrayList<Semaphore> floorsInGoingDown;
+
     public static ArrayList<ArrayList<Semaphore>> floorsOut;
 
     public static boolean elevatorMayStop;
@@ -64,9 +66,12 @@ public class ElevatorScene {
         elevatorMayStop = false;
 
         scene = this;
-        floorsIn = new ArrayList<Semaphore>();
+        floorsInGoingUp = new ArrayList<Semaphore>();
+        floorsInGoingDown = new ArrayList<Semaphore>();
         for (int i = 0; i < numberOfFloors; i++) {
-            floorsIn.add(new Semaphore(0));
+            floorsInGoingUp.add(new Semaphore(0));
+            floorsInGoingDown.add(new Semaphore(0));
+
         }
         personCountMutex = new Semaphore(1);
         waitInElevatorMutex = new ArrayList<Semaphore>();
@@ -171,8 +176,14 @@ public class ElevatorScene {
 
         if (goingUp.get(el)) {
             currentFloor.set(el, (currentFloor.get(el) + 1));
+            if (ElevatorScene.currentFloor.get(el) >= (this.numberOfFloors-1)) {
+                goingUp.set(el, false);
+            }
         } else {
             currentFloor.set(el, (currentFloor.get(el) - 1));
+            if (ElevatorScene.currentFloor.get(el) <= 0) {
+                goingUp.set(el, true);
+            }
         }
     }
 
