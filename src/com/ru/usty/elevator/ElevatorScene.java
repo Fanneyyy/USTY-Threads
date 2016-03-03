@@ -32,10 +32,11 @@ public class ElevatorScene {
     public static boolean elevatorMayStop;
     public static ArrayList<Integer> currentFloor;
     public static ArrayList<Integer> numberOfPeopleInElevator;
+    public ArrayList<Boolean> goingUp;
 
-	private int numberOfFloors;
+
+    private int numberOfFloors;
 	private int numberOfElevators;
-    private ArrayList<Boolean> goingUp;
     private Thread elevatorThread = null;
 	ArrayList<Integer> personCount; //use if you want but
 									//throw away and

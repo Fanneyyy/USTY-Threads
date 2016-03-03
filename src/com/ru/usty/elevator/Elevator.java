@@ -1,7 +1,10 @@
 package com.ru.usty.elevator;
 
+import java.util.concurrent.Semaphore;
+
 public class Elevator implements Runnable {
     int myNumber;
+
 
     public Elevator(int elevatorNumber) {
         this.myNumber = elevatorNumber;
@@ -19,6 +22,8 @@ public class Elevator implements Runnable {
             if (roomInElevator > ElevatorScene.scene.personCount.get(ElevatorScene.currentFloor.get(myNumber))) {
                 roomInElevator = ElevatorScene.scene.personCount.get(ElevatorScene.currentFloor.get(myNumber));
             }
+            waitAmoment();
+
 
             System.out.println("Room In Elevator " + roomInElevator);
 
@@ -34,16 +39,13 @@ public class Elevator implements Runnable {
             ElevatorScene.waitInElevatorMutex.get(myNumber).tryAcquire(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
             ElevatorScene.floorsOut.get(myNumber).get(ElevatorScene.currentFloor.get(myNumber)).release(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
             waitAmoment();
-            System.out.println("myNumber: " + myNumber);
-            System.out.println("currentFloor: " + ElevatorScene.currentFloor.get(myNumber));
-            System.out.println("myNumber: " + myNumber);
 
             ElevatorScene.floorsOut.get(myNumber).get(ElevatorScene.currentFloor.get(myNumber)).tryAcquire(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
         }
     }
     private void waitAmoment() {
         try {
-            Thread.sleep(400);
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

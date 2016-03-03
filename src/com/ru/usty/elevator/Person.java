@@ -3,19 +3,27 @@ package com.ru.usty.elevator;
 public class Person implements Runnable {
 
     int sourceFloor, destinationFloor, elevator;
+    boolean goingUp;
 
     public Person(int sourceFloor, int destinationFloor) {
         this.sourceFloor = sourceFloor;
         this.destinationFloor = destinationFloor;
+        if (destinationFloor > sourceFloor) {
+            this.goingUp = true;
+        } else {
+            this.goingUp = false;
+        }
+        this.elevator = -1;
     }
 
     @Override
     public void run() {
         try {
+            while (this.elevator == -1) {
+                this.elevator = ElevatorController.elevatorPick(sourceFloor, goingUp);
+            }
 
             ElevatorScene.floorsIn.get(sourceFloor).acquire(); //waiting for elevator
-
-            this.elevator = ElevatorController.elevatorPick(sourceFloor);
 
             ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
 
