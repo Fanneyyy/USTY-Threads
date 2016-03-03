@@ -15,7 +15,7 @@ public class Elevator implements Runnable {
             }
             boolean middleFloors = false;
             for (int i = 1; i < ElevatorScene.scene.getNumberOfFloors()-1; i++) {
-                if (ElevatorScene.scene.isButtonPushedAtFloor(i)) {
+                if (ElevatorScene.scene.isButtonPushedAtFloor(i)) { //TODO Mér dettur í hug að þetta sé til ignora ekki miðjuhæðina?
                     middleFloors = true;
                 }
             }
@@ -28,13 +28,13 @@ public class Elevator implements Runnable {
             }
             waitAmoment();
 
-            if (roomInElevator >= 0) {
+            if (roomInElevator >= 0) {              //TODO Ef að það eru fleiri en 1 hæð?
                 try {
                     ElevatorScene.elevatorOpenMutex.acquire();
                     ElevatorScene.elevatorOpen = myNumber;
                     if (ElevatorScene.scene.goingUp.get(myNumber)) {
                         if (roomInElevator > ElevatorScene.scene.personsGoingUp.get(ElevatorScene.currentFloor.get(myNumber))) {
-                            roomInElevator = ElevatorScene.scene.personsGoingUp.get(ElevatorScene.currentFloor.get(myNumber));
+                            roomInElevator = ElevatorScene.scene.personsGoingUp.get(ElevatorScene.currentFloor.get(myNumber));  //TODO What is this?
                         }
                         ElevatorScene.floorsInGoingUp.get(ElevatorScene.currentFloor.get(myNumber)).release(roomInElevator);
                     } else {

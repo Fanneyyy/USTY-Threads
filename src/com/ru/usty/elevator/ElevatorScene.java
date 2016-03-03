@@ -56,7 +56,7 @@ public class ElevatorScene {
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
-        Random random = new Random(234645236);
+        Random random = new Random(234645236);      //TODO Random? why
 
         elevatorMayStop = true;
         if (elevatorThread != null) {

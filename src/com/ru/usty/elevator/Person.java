@@ -10,7 +10,7 @@ public class Person implements Runnable {
         this.destinationFloor = destinationFloor;
         this.elevator = 0;
         if (destinationFloor > sourceFloor) {
-            this.goingUp = true;
+            this.goingUp = true;                //TODO What is this?
         } else {
             this.goingUp = false;
         }
