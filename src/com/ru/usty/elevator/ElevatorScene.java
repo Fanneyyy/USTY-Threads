@@ -27,7 +27,7 @@ public class ElevatorScene {
     public static Semaphore personCountMutex;
     public static ArrayList<Semaphore> waitInElevatorMutex;
     public static ArrayList<Semaphore> floorsIn;
-    public static ArrayList<Semaphore> floorsOut;
+    public static ArrayList<ArrayList<Semaphore>> floorsOut;
 
     public static boolean elevatorMayStop;
     public static ArrayList<Integer> currentFloor;
@@ -65,13 +65,7 @@ public class ElevatorScene {
         scene = this;
         floorsIn = new ArrayList<Semaphore>();
         for (int i = 0; i < numberOfFloors; i++) {
-            Semaphore temp = new Semaphore(0);
-            floorsIn.add(temp);
-        }
-        floorsOut = new ArrayList<Semaphore>();
-        for (int i = 0; i < numberOfFloors; i++) {
-            Semaphore temp = new Semaphore(0);
-            floorsOut.add(temp);
+            floorsIn.add(new Semaphore(0));
         }
         personCountMutex = new Semaphore(1);
         waitInElevatorMutex = new ArrayList<Semaphore>();
@@ -80,17 +74,41 @@ public class ElevatorScene {
         numberOfPeopleInElevator = new ArrayList<Integer>();
         currentFloor = new ArrayList<Integer>();
         exitedCountMutex = new ArrayList<Semaphore>();
+        floorsOut = new ArrayList<ArrayList<Semaphore>>();
+        for (int i = 0 ; i < numberOfElevators; i++) {
+            floorsOut.add(new ArrayList<Semaphore>());
+            waitInElevatorMutex.add(new Semaphore(0));
+
+            for (int j = 0; j < numberOfFloors; j++) {
+                floorsOut.get(i).add(new Semaphore(0));
+
+            }
+        }
+        this.numberOfFloors = numberOfFloors;
+        this.numberOfElevators = numberOfElevators;
+
+        personCount = new ArrayList<Integer>();
+        for(int i = 0; i < numberOfFloors; i++) {
+            this.personCount.add(0);
+        }
+        if(exitedCount == null) {
+            exitedCount = new ArrayList<Integer>();
+        }
+        else {
+            exitedCount.clear();
+        }
+        for(int i = 0; i < getNumberOfFloors(); i++) {
+            this.exitedCount.add(0);
+        }
+
         for (int i = 0; i < numberOfElevators; i++) {
             int elevatorSpawn =  random.nextInt((numberOfFloors - 1) + 1);
             elevatorThread = new Thread(new Elevator(i));
-            elevatorThread.start();
             numberOfPeopleInElevator.add(0);
             goingUp.add(true);
-            System.out.println("elevatorSpawn : " + elevatorSpawn);
             currentFloor.add(elevatorSpawn);
-            waitInElevatorMutex.add(new Semaphore(0));
             exitedCountMutex.add(new Semaphore(1));
-
+            elevatorThread.start();
         }
 
         System.out.println(numberOfPeopleInElevator.get(0));
@@ -106,22 +124,7 @@ public class ElevatorScene {
 		 * elevator threads to stop
 		 */
 
-		this.numberOfFloors = numberOfFloors;
-		this.numberOfElevators = numberOfElevators;
 
-		personCount = new ArrayList<Integer>();
-		for(int i = 0; i < numberOfFloors; i++) {
-			this.personCount.add(0);
-		}
-		if(exitedCount == null) {
-			exitedCount = new ArrayList<Integer>();
-		}
-		else {
-			exitedCount.clear();
-		}
-		for(int i = 0; i < getNumberOfFloors(); i++) {
-			this.exitedCount.add(0);
-		}
 	}
 
 	//Base function: definition must not change

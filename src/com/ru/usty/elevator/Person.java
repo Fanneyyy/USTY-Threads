@@ -23,7 +23,7 @@ public class Person implements Runnable {
 
             ElevatorScene.waitInElevatorMutex.get(elevator).acquire(); //waiting in elevator
 
-            ElevatorScene.floorsOut.get(destinationFloor).acquire(); //waiting to leave elevator on correct floor
+            ElevatorScene.floorsOut.get(elevator).get(destinationFloor).acquire(); //waiting to leave elevator on correct floor
 
         } catch (InterruptedException e) {
             e.printStackTrace();

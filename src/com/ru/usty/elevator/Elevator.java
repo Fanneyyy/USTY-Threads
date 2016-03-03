@@ -32,12 +32,13 @@ public class Elevator implements Runnable {
             waitAmoment();
 
             ElevatorScene.waitInElevatorMutex.get(myNumber).tryAcquire(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
-
-            ElevatorScene.floorsOut.get(ElevatorScene.currentFloor.get(myNumber)).release(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
+            ElevatorScene.floorsOut.get(myNumber).get(ElevatorScene.currentFloor.get(myNumber)).release(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
             waitAmoment();
-            System.out.println("Number of people in elevator " + ElevatorScene.numberOfPeopleInElevator.get(myNumber));
+            System.out.println("myNumber: " + myNumber);
+            System.out.println("currentFloor: " + ElevatorScene.currentFloor.get(myNumber));
+            System.out.println("myNumber: " + myNumber);
 
-            ElevatorScene.floorsOut.get(ElevatorScene.currentFloor.get(myNumber)).tryAcquire(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
+            ElevatorScene.floorsOut.get(myNumber).get(ElevatorScene.currentFloor.get(myNumber)).tryAcquire(ElevatorScene.numberOfPeopleInElevator.get(myNumber));
         }
     }
     private void waitAmoment() {
