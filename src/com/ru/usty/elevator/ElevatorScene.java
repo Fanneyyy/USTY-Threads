@@ -45,13 +45,14 @@ public class ElevatorScene {
 									//implement differently
 									//if it suits you
 
+	ArrayList<Integer> personsGoingUp;
+    ArrayList<Integer> personsGoingDown;
     ArrayList<Integer> exitedCount = null;
 
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
         Random random = new Random(234645236);
-
 
         elevatorMayStop = true;
         if (elevatorThread != null) {
@@ -94,8 +95,12 @@ public class ElevatorScene {
         this.numberOfElevators = numberOfElevators;
 
         personCount = new ArrayList<Integer>();
+        personsGoingUp = new ArrayList<Integer>();
+        personsGoingDown = new ArrayList<Integer>();
         for(int i = 0; i < numberOfFloors; i++) {
             this.personCount.add(0);
+            this.personsGoingUp.add(0);
+            this.personsGoingDown.add(0);
         }
         if(exitedCount == null) {
             exitedCount = new ArrayList<Integer>();
@@ -136,8 +141,8 @@ public class ElevatorScene {
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public Thread addPerson(int sourceFloor, int destinationFloor) {
-
-        Thread thread = new Thread(new Person(sourceFloor, destinationFloor));
+        Person person = new Person(sourceFloor, destinationFloor);
+        Thread thread = new Thread(person);
         thread.start();
 		/**
 		 * Important to add code here to make a
@@ -147,8 +152,12 @@ public class ElevatorScene {
 		 * so that it can be reaped in the testSuite
 		 * (you don't have to join() yourself)
 		 */
-
-        ElevatorScene.scene.incrementNumberOfPeopleWaitingAtFloor(sourceFloor);
+        System.out.println("Person going up: " + goingUp);
+        if (person.goingUp) {
+            ElevatorScene.scene.incrementNumberOfPeopleWaitingAtFloor(sourceFloor, true);
+        } else {
+            ElevatorScene.scene.incrementNumberOfPeopleWaitingAtFloor(sourceFloor, false);
+        }
         return thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 
@@ -223,20 +232,40 @@ public class ElevatorScene {
 		return personCount.get(floor);
 	}
 
-    public void decrementNumberOfPeopleWaitingAtFloor(int floor) {
+    public int getNumberOfPeopleWaitingAtFloorGoingUp(int floor) {
+
+        return personsGoingUp.get(floor);
+    }
+
+    public int getNumberOfPeopleWaitingAtFloorGoingDown(int floor) {
+
+        return personsGoingDown.get(floor);
+    }
+
+    public void decrementNumberOfPeopleWaitingAtFloor(int floor, boolean goingUp) {
         try {
             personCountMutex.acquire();
             personCount.set(floor, (personCount.get(floor) - 1));
+            if (goingUp) {
+                personsGoingUp.set(floor, (personsGoingUp.get(floor) - 1));
+            } else {
+                personsGoingDown.set(floor, (personsGoingDown.get(floor) - 1));
+            }
             personCountMutex.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    public void incrementNumberOfPeopleWaitingAtFloor(int floor) {
+    public void incrementNumberOfPeopleWaitingAtFloor(int floor, boolean goingUp) {
         try {
             personCountMutex.acquire();
             personCount.set(floor, (personCount.get(floor) + 1));
+            if (goingUp) {
+                personsGoingUp.set(floor, (personsGoingUp.get(floor) + 1));
+            } else {
+                personsGoingDown.set(floor, (personsGoingDown.get(floor) + 1));
+            }
             personCountMutex.release();
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -8,6 +8,7 @@ public class Person implements Runnable {
     public Person(int sourceFloor, int destinationFloor) {
         this.sourceFloor = sourceFloor;
         this.destinationFloor = destinationFloor;
+        this.elevator = 0;
         if (destinationFloor > sourceFloor) {
             this.goingUp = true;
         } else {
@@ -18,16 +19,14 @@ public class Person implements Runnable {
     @Override
     public void run() {
         try {
-            //this.elevator = ElevatorController.elevatorPick(sourceFloor);
-            this.elevator = 0;
+            this.elevator = ElevatorController.elevatorPick(sourceFloor);
             if (goingUp) {
-                ElevatorScene.floorsInGoingUp.get(sourceFloor).acquire(); //waiting for elevator
+                ElevatorScene.floorsInGoingUp.get(sourceFloor).acquire(); //waiting for elevator, going up
             } else {
-                ElevatorScene.floorsInGoingDown.get(sourceFloor).acquire(); //waiting for elevator
+                ElevatorScene.floorsInGoingDown.get(sourceFloor).acquire(); //waiting for elevator, going down
             }
 
-            ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
-
+            ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor, goingUp);
             ElevatorScene.scene.incrementNumberOfPeopleInElevator(elevator);
 
             ElevatorScene.waitInElevatorMutex.get(elevator).acquire(); //waiting in elevator
